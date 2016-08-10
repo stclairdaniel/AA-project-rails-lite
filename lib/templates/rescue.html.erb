@@ -1,0 +1,9 @@
+<h1>Error Error Error</h1>
+<h2><%= @error_message %></h2>
+<ul>
+<% @backtrace.each do |bt| %>
+<li>
+<%= bt %>
+</li>
+<% end %>
+</ul>

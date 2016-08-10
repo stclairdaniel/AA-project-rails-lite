@@ -1,6 +1,7 @@
 require 'rack'
 require 'flash'
 require 'controller_base'
+require 'byebug'
 
 describe Flash do
   let(:req) { Rack::Request.new({'rack.input' => {}}) }
