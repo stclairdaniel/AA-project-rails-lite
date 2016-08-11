@@ -1,6 +1,7 @@
 require 'rack'
 require 'controller_base'
 require 'router'
+require 'byebug'
 
 describe ControllerBase do
   let(:req) { Rack::Request.new({'rack.input' => {}, 'REQUEST_METHOD' => 'GET'}) }

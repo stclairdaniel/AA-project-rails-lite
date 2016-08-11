@@ -4,6 +4,7 @@ require 'active_support/inflector'
 require 'erb'
 require_relative './session'
 require_relative './flash'
+require_relative './auth_token'
 
 class ControllerBase
   attr_reader :req, :res, :params
@@ -13,6 +14,7 @@ class ControllerBase
     @req = req
     @res = res
     @params = req.params
+
   end
 
   # Helper method to alias @already_built_response
@@ -40,6 +42,7 @@ class ControllerBase
     @already_built_response = true
     session.store_session(@res)
     flash.store_flash(@res)
+
   end
 
   # use ERB and binding to evaluate templates
@@ -59,9 +62,40 @@ class ControllerBase
     @flash ||= Flash.new(@req)
   end
 
+  def auth_token
+    @auth_token ||= AuthToken.new(@req)
+  end
+
+  def form_authenticity_token
+    @csrf_token ||= SecureRandom.urlsafe_base64(32)
+    auth_token.store_auth_token(@res, @csrf_token)
+    @csrf_token
+  end
+
+  def check_authenticity_token
+    if auth_token.csrf_token != params["authenticity_token"]
+      raise "Invalid authenticity token"
+      false
+    else
+      true
+    end
+  end
+
+  def self.protect_from_forgery
+    @@protected = true
+  end
+
   # use this with the router to call action_name (:index, :show, :create...)
   def invoke_action(name)
     send(name)
-    render(name) unless already_built_response?
+    if @@protected && !req.get?
+      if check_authenticity_token
+        unless already_built_response?
+        render(name)
+      end
+    end
+    else
+      render(name) unless already_built_response?
+    end
   end
 end

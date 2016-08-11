@@ -38,6 +38,7 @@ class Static
       res.finish
     else
       res.status = 404
+      res.write("404 Error: Content not found")
       res.finish
     end
   end
